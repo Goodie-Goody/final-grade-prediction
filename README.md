@@ -1,8 +1,3 @@
-# final-grade-prediction
-Absolutely! Here’s a well-structured and engaging README file for your GitHub project:
-
----
-
 # End-to-End Machine Learning Pipeline for Academic Performance Prediction in Nigerian Secondary Schools
 
 ## Overview
