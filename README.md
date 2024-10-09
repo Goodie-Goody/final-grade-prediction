@@ -8,7 +8,7 @@ Nigerian senior secondary schools often lack effective warning systems to identi
 
 ## Unique Value Add
 ### Data Engineering
-- **Data Ingestion**: We ingested the raw dataset into an S3 bucket.
+- **Data Ingestion**: We ingested the raw dataset into an S3 bucket (studentperformance).
 - **Data Transformation**: Using AWS Glue, we created an ELT pipeline to clean and transform the data.
 - **Data Storage**: The processed data was stored in Amazon Redshift, ensuring efficient querying and analysis.
 
@@ -26,6 +26,15 @@ Nigerian senior secondary schools often lack effective warning systems to identi
 ### Web Application
 - **User Interface**: We developed a Flask web application that allows users to upload Excel files and download predictions.
 - **Additional Features**: Users can download a data dictionary and sample data, enhancing the overall user experience.
+
+## ETL and Data Warehouse Process
+- **Data Extraction**: We extracted sample data from Kaggle and engaged with school administrators to understand factors affecting student performance.
+- **Data Development**: Collaboratively ensured data quality and efficiency using Excel for initial transformations and enhancements.
+- **AWS S3**: Uploaded our four tables into four folders within the S3 bucket (studentperformance).
+- **AWS Redshift**: Created a serverless database and workgroup (studentperformance-group), setting up necessary components like VPC, namespace, and IAM roles. Created four tables in Redshift according to S3 preferences.
+- **AWS Glue**: Set up a crawler (student-performance) to load data from S3, attached the ETL-role, created the database and Redshift connection, and configured a job (student) to transfer data from S3 to Redshift.
+
+This setup supports incremental loads, allowing updates, additions, or removals of columns in the Excel file to be reflected in the data warehouse by simply re-uploading to S3 and rerunning the job.
 
 ## Impact
 This project represents a significant improvement over the previous situation where schools relied solely on intuition. With an accuracy of 84%, our logistic regression model provides a reliable tool for predicting student performance, allowing for timely interventions. The model's performance, particularly in identifying students likely to pass (Precision 0.88, Recall 0.91), ensures that at-risk students receive the support they need.
@@ -56,14 +65,12 @@ Moreover, as more data is ingested and the system is continuously monitored and 
 
 4. **Deploy to Fly.io**:
    ```bash
-   flyctl launch
-   flyctl deploy
+   fly launch
+   fly deploy
    ```
 
 5. **Access the application**:
-   Open your web browser and go to 'https://waec-prediction.fly.dev/'.
+   Open your web browser and go to `https://waec-prediction.fly.dev/`
 
 ## Contributing
-We welcome contributions! Reach out to us via email at drkalugoodness@gmail.com
-
----
+We welcome contributions! Please reach out via emails at drkalugoodness@gmail.com
