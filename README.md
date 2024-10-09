@@ -61,7 +61,7 @@ Moreover, as more data is ingested and the system is continuously monitored and 
    ```
 
 5. **Access the application**:
-   Open your web browser and go to `http://localhost:5000/`.
+   Open your web browser and go to 'https://waec-prediction.fly.dev/'.
 
 ## Contributing
 We welcome contributions! Reach out to us via email at drkalugoodness@gmail.com
