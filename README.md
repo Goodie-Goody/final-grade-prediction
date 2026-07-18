@@ -182,17 +182,6 @@ numerically so colour is never the only way to read it.
 - The `full` feature set is retained deliberately as a demonstration of leakage. It is not
   a result and should not be quoted as one.
 
-## A note on the earlier AWS version
-
-The first version of this project was prototyped on AWS, with raw data in S3, an AWS Glue
-job for transformation, Amazon Redshift for storage, and a Flask app serving predictions.
-That infrastructure is no longer running and none of it is in this repo, so it is
-described here as history rather than as something you can reproduce.
-
-For a dataset of 382 rows, a warehouse of that shape was far larger than the problem
-needed. If the pipeline were rebuilt today, loading straight into BigQuery or DuckDB would
-be a better fit for the data volume and would cost nothing to run.
-
 ## Attribution
 
 P. Cortez and A. Silva, "Using Data Mining to Predict Secondary School Student
