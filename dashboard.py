@@ -96,7 +96,7 @@ def rate_fig(df, col, base, order=None, height=330, title=None):
     fig.update_yaxes(tickformat=".0%", range=[0, 0.98], gridcolor=C_LINE, zeroline=False)
     fig.update_xaxes(showgrid=False, tickfont=dict(size=11.5))
     fig.update_layout(height=height, template="plotly_white", bargap=0.42, font=FONT,
-                      margin=dict(t=30 if title else 12, b=40, l=52, r=20),
+                      margin=dict(t=30 if title else 12, b=40, l=46, r=14),
                       plot_bgcolor="white", paper_bgcolor="white", showlegend=False,
                       title=dict(text=title, font=dict(size=13, color=C_GREY),
                                  x=0, xanchor="left") if title else None)
@@ -127,7 +127,7 @@ def support_fig(df, base, height=340):
     fig.update_xaxes(tickformat=".0%", range=[0, 0.62], gridcolor=C_LINE)
     fig.update_yaxes(autorange="reversed", showgrid=False, tickfont=dict(size=11.5))
     fig.update_layout(height=height, template="plotly_white", bargap=0.45, barmode="group",
-                      font=FONT, margin=dict(t=12, b=40, l=125, r=30),
+                      font=FONT, margin=dict(t=12, b=40, l=118, r=22),
                       plot_bgcolor="white", paper_bgcolor="white", showlegend=False)
     return fig
 
@@ -219,7 +219,7 @@ def leakage_fig(res, height=400):
     fig.update_yaxes(range=[0, 1.12], gridcolor=C_LINE, zeroline=False, tickformat=".0%")
     fig.update_xaxes(showgrid=False, tickfont=dict(size=12))
     fig.update_layout(height=height, template="plotly_white", barmode="group",
-                      bargap=0.42, font=FONT, margin=dict(t=16, b=44, l=54, r=20),
+                      bargap=0.42, font=FONT, margin=dict(t=16, b=44, l=48, r=14),
                       plot_bgcolor="white", paper_bgcolor="white",
                       legend=dict(orientation="h", y=1.12, x=0, title_text=""))
     return fig
@@ -248,7 +248,7 @@ def pr_fig(curves, prevalence, height=400):
     fig.update_yaxes(title="Precision", range=[0, 1.03], gridcolor=C_LINE,
                      title_font=dict(size=11.5, color=C_GREY))
     fig.update_layout(height=height, template="plotly_white", font=FONT,
-                      margin=dict(t=16, b=52, l=60, r=20),
+                      margin=dict(t=16, b=52, l=52, r=14),
                       plot_bgcolor="white", paper_bgcolor="white",
                       legend=dict(orientation="h", y=-0.22, x=0, title_text="",
                                   font=dict(size=11)))
@@ -487,19 +487,72 @@ h1 { font-size:31px; margin:0 0 10px; font-weight:600; letter-spacing:-.5px; }
   border-radius:14px; }
 .note b { color:#1F2933; }
 @media (max-width:900px) {
-  .secbody { grid-template-columns:1fr; gap:20px; }
+  .secbody { grid-template-columns:1fr; gap:18px; }
   .twoup, .compare { grid-template-columns:1fr; }
+}
+/* Mobile: strip the nested boxes back to a single flat column. Stacked
+   rounded cards inside rounded sections inside a padded page reads as clutter
+   on a narrow screen, so below 640px the section borders come off and the
+   numbered rail moves inline with the heading. */
+@media (max-width:640px) {
+  .wrap { padding:26px 13px 56px; }
+  h1 { font-size:23px; letter-spacing:-.3px; }
+  .sub { font-size:13.5px; margin-bottom:20px; }
+  .tabs { gap:2px; }
+  .tab { padding:11px 13px; font-size:13.5px; flex:1; }
+  .kpis { grid-template-columns:1fr 1fr; gap:9px; margin-bottom:16px; }
+  .card { padding:13px 14px; border-radius:11px; }
+  .card .k { font-size:9.5px; letter-spacing:.5px; }
+  .card .v { font-size:25px; margin:5px 0 2px; letter-spacing:-.5px; }
+  .card .s { font-size:11px; }
+  .legendbar { gap:10px 16px; font-size:11.5px; margin-left:2px; }
+  .sec { display:block; }
+  .rail { display:none; }
+  .secbody { display:block; border:0; border-radius:0; background:none;
+             padding:0; margin-bottom:30px; }
+  .sectext { margin-bottom:14px; }
+  .sectext h3 { font-size:16px; }
+  .sectext h3:before { content:counter(sec) ". "; color:#C2410C; font-weight:600; }
+  .page { counter-reset:sec; }
+  .sec { counter-increment:sec; }
+  .sectext p { font-size:13px; line-height:1.65; }
+  /* charts get their own card so they still read as discrete objects */
+  .secvis { background:#fff; border:1px solid #E4E7EB; border-radius:12px;
+            padding:10px 4px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .twoup { gap:12px; }
+  .twoup > div { border-top:1px dashed #E4E7EB; padding-top:8px; }
+  .twoup > div:first-child { border-top:0; padding-top:0; }
+  .timeline, .compare { background:#fff; border:1px solid #E4E7EB;
+                        border-radius:12px; padding:14px 15px; }
+  .secvis:has(.timeline), .secvis:has(.compare) { background:none; border:0;
+                                                  padding:0; }
+  .tl-row { grid-template-columns:1fr; gap:6px; padding:11px 0; }
+  .tl-label { font-size:10.5px; }
+  .tl-items span { font-size:12px; padding:4px 10px; }
+  .cmp { padding:15px 16px; }
+  .cmp-row b { font-size:18px; }
+  .note { padding:15px 16px; font-size:12.8px; border-radius:12px; }
 }
 """
 
     js = """
+function resizePlots(){
+  if (window.Plotly) {
+    document.querySelectorAll('.plotly-graph-div').forEach(function(d){
+      try { Plotly.Plots.resize(d); } catch(e) {}
+    });
+  }
+}
+window.addEventListener('resize', resizePlots);
+window.addEventListener('orientationchange', function(){ setTimeout(resizePlots, 200); });
+
 document.querySelectorAll('.tab').forEach(function(t){
   t.addEventListener('click', function(){
     document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('on'); });
     document.querySelectorAll('.page').forEach(function(x){ x.classList.remove('on'); });
     t.classList.add('on');
     document.getElementById(t.dataset.page).classList.add('on');
-    window.dispatchEvent(new Event('resize'));
+    resizePlots();
     window.scrollTo({top:0, behavior:'smooth'});
   });
 });
