@@ -75,8 +75,6 @@ built to demonstrate.
 | `images/` | Static charts, so the repository page shows the results without any tooling |
 | `updated_data.xlsx` | The generated dataset, committed so the repo runs without a rebuild |
 | `requirements.txt` | Pinned dependencies |
-| `Datathon_Analysis.pbix` | The original Power BI report from the first version of this project |
-| `student_performance_theme.json` | Power BI theme file for that report |
 
 ## Reproducing
 
@@ -163,8 +161,7 @@ independently by the fail rates in the dashboard:
 ## Dashboard
 
 `python dashboard.py` writes a self contained `index.html` with two pages, one for
-the risk factors and one for the leakage story. It replaces the original Power BI report
-and fixes three problems that report had.
+the risk factors and one for the leakage story.
 
 GitHub shows raw source rather than rendering `.html` files, so the dashboard is published
 through GitHub Pages at the link at the top of this file. The static charts above are
@@ -180,8 +177,8 @@ Category bands are mapped from the original numeric codes, so travel time and st
 sort in their natural order rather than alphabetically.
 
 Sample sizes appear in every category label, and any group with fewer than ten students is
-hatched and asterisked. One category in the original report showed a 0 percent fail rate
-based on two students, presented as though it were a finding.
+hatched and asterisked. Paternal education has a category of two students, for example,
+whose fail rate would otherwise read as a clean finding rather than as noise.
 
 The palette is colour blind safe, colour encodes meaning rather than decoration
 (terracotta for above the cohort fail rate, grey for below), and every bar is labelled
