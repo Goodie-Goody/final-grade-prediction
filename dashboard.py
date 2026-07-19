@@ -1,10 +1,10 @@
 """
 dashboard.py
 ============
-Builds a self-contained two page dashboard (dashboard.html) from
+Builds a self-contained two page dashboard (index.html) from
 updated_data.xlsx. No Power BI, no server, no account.
 
-    python dashboard.py        # writes dashboard.html, open it in any browser
+    python dashboard.py        # writes index.html, open it in any browser
 
 Page 1, Risk Factors: which student characteristics are associated with
 failure, presented as fail rates by category.
@@ -32,7 +32,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 DATA_PATH = Path("updated_data.xlsx")
-OUT_PATH = Path("dashboard.html")
+OUT_PATH = Path("index.html")
 TARGET, FAIL = "waec", "FAIL"
 MIN_N = 10
 SEED = 42
@@ -48,7 +48,8 @@ STUDY = {1: "<2 hrs", 2: "2-5 hrs", 3: "5-10 hrs", 4: ">10 hrs"}
 EDU = {0: "None", 1: "Primary", 2: "Middle", 3: "Secondary", 4: "Higher"}
 
 PLOT_CFG = {"displaylogo": False, "responsive": True,
-            "modeBarButtonsToRemove": ["lasso2d", "select2d", "autoScale2d"]}
+            "displayModeBar": False, "scrollZoom": False,
+            "doubleClick": False, "staticPlot": False}
 FONT = dict(family="Segoe UI, Helvetica, Arial", color=C_INK, size=12)
 
 
@@ -93,11 +94,13 @@ def rate_fig(df, col, base, order=None, height=330, title=None):
         text=labels, textposition="outside", textfont=dict(size=12),
         hovertext=hover, hoverinfo="text"))
     fig.add_hline(y=base, line_dash="dash", line_color=C_INK, opacity=.45, line_width=1.5)
-    fig.update_yaxes(tickformat=".0%", range=[0, 0.98], gridcolor=C_LINE, zeroline=False)
-    fig.update_xaxes(showgrid=False, tickfont=dict(size=11.5))
+    fig.update_yaxes(tickformat=".0%", range=[0, 0.98], gridcolor=C_LINE,
+                     zeroline=False, fixedrange=True)
+    fig.update_xaxes(showgrid=False, tickfont=dict(size=11.5), fixedrange=True,
+                     automargin=True)
     fig.update_layout(height=height, template="plotly_white", bargap=0.42, font=FONT,
                       margin=dict(t=30 if title else 12, b=40, l=46, r=14),
-                      plot_bgcolor="white", paper_bgcolor="white", showlegend=False,
+                      plot_bgcolor="white", paper_bgcolor="white", dragmode=False, showlegend=False, 
                       title=dict(text=title, font=dict(size=13, color=C_GREY),
                                  x=0, xanchor="left") if title else None)
     return fig
@@ -121,14 +124,17 @@ def support_fig(df, base, height=340):
                        f"<br>students: {len(sub)}")
         fig.add_trace(go.Bar(y=ys, x=xs, orientation="h", marker_color=cols,
                              marker_line=dict(width=0), marker_cornerradius=5,
-                             text=txt, textposition="outside", textfont=dict(size=11),
+                             text=txt, textposition="auto",
+                             textfont=dict(size=11, color="white"),
+                             insidetextanchor="middle",
                              hovertext=hov, hoverinfo="text"))
     fig.add_vline(x=base, line_dash="dash", line_color=C_INK, opacity=.45, line_width=1.5)
-    fig.update_xaxes(tickformat=".0%", range=[0, 0.62], gridcolor=C_LINE)
-    fig.update_yaxes(autorange="reversed", showgrid=False, tickfont=dict(size=11.5))
+    fig.update_xaxes(tickformat=".0%", range=[0, 0.72], gridcolor=C_LINE, fixedrange=True)
+    fig.update_yaxes(autorange="reversed", showgrid=False, tickfont=dict(size=11.5),
+                     fixedrange=True, automargin=True)
     fig.update_layout(height=height, template="plotly_white", bargap=0.45, barmode="group",
                       font=FONT, margin=dict(t=12, b=40, l=118, r=22),
-                      plot_bgcolor="white", paper_bgcolor="white", showlegend=False)
+                      plot_bgcolor="white", paper_bgcolor="white", dragmode=False, showlegend=False)
     return fig
 
 
@@ -216,11 +222,13 @@ def leakage_fig(res, height=400):
             text=[f"{v:.2f}" for v in sub["accuracy"]], textposition="outside",
             textfont=dict(size=12),
             hovertemplate="<b>%{x}</b><br>" + name + "<br>accuracy: %{y:.3f}<extra></extra>"))
-    fig.update_yaxes(range=[0, 1.12], gridcolor=C_LINE, zeroline=False, tickformat=".0%")
-    fig.update_xaxes(showgrid=False, tickfont=dict(size=12))
+    fig.update_yaxes(range=[0, 1.12], gridcolor=C_LINE, zeroline=False,
+                     tickformat=".0%", fixedrange=True)
+    fig.update_xaxes(showgrid=False, tickfont=dict(size=12), fixedrange=True,
+                     automargin=True)
     fig.update_layout(height=height, template="plotly_white", barmode="group",
                       bargap=0.42, font=FONT, margin=dict(t=16, b=44, l=48, r=14),
-                      plot_bgcolor="white", paper_bgcolor="white",
+                      plot_bgcolor="white", paper_bgcolor="white", dragmode=False,
                       legend=dict(orientation="h", y=1.12, x=0, title_text=""))
     return fig
 
@@ -244,12 +252,13 @@ def pr_fig(curves, prevalence, height=400):
                   annotation_position="bottom right",
                   annotation_font=dict(size=11, color=C_GREY))
     fig.update_xaxes(title="Recall (share of failing students caught)", range=[0, 1],
-                     gridcolor=C_LINE, title_font=dict(size=11.5, color=C_GREY))
+                     gridcolor=C_LINE, title_font=dict(size=11.5, color=C_GREY),
+                     fixedrange=True)
     fig.update_yaxes(title="Precision", range=[0, 1.03], gridcolor=C_LINE,
-                     title_font=dict(size=11.5, color=C_GREY))
+                     title_font=dict(size=11.5, color=C_GREY), fixedrange=True)
     fig.update_layout(height=height, template="plotly_white", font=FONT,
                       margin=dict(t=16, b=52, l=52, r=14),
-                      plot_bgcolor="white", paper_bgcolor="white",
+                      plot_bgcolor="white", paper_bgcolor="white", dragmode=False,
                       legend=dict(orientation="h", y=-0.22, x=0, title_text="",
                                   font=dict(size=11)))
     return fig

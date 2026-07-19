@@ -4,7 +4,7 @@ An end to end machine learning project that predicts whether a secondary school 
 will fail their final exam, and then shows how much of that predictive power was an
 illusion caused by target leakage.
 
-**[View the interactive dashboard](https://goodie-goody.github.io/final-grade-prediction/dashboard.html)**
+**[View the interactive dashboard](https://goodie-goody.github.io/final-grade-prediction/)**
 
 ## The headline result
 
@@ -70,11 +70,13 @@ built to demonstrate.
 |---|---|
 | `build_dataset.py` | Rebuilds `updated_data.xlsx` from the original UCI source |
 | `Education_dataset.ipynb` | Modelling notebook: preprocessing, five models, two feature sets, evaluation, charts |
-| `dashboard.py` | Generates `dashboard.html`, a two page interactive dashboard |
+| `dashboard.py` | Generates `index.html`, a two page interactive dashboard |
 | `make_charts.py` | Generates the static PNGs in `images/` used by this README |
 | `images/` | Static charts, so the repository page shows the results without any tooling |
 | `updated_data.xlsx` | The generated dataset, committed so the repo runs without a rebuild |
 | `requirements.txt` | Pinned dependencies |
+| `Datathon_Analysis.pbix` | The original Power BI report from the first version of this project |
+| `student_performance_theme.json` | Power BI theme file for that report |
 
 ## Reproducing
 
@@ -84,7 +86,7 @@ source .venv/bin/activate        # fish: source .venv/bin/activate.fish
 pip install -r requirements.txt
 
 python build_dataset.py          # optional, updated_data.xlsx is already committed
-python dashboard.py              # writes dashboard.html
+python dashboard.py              # writes index.html
 python make_charts.py            # writes the PNGs in images/
 ```
 
@@ -160,7 +162,7 @@ independently by the fail rates in the dashboard:
 
 ## Dashboard
 
-`python dashboard.py` writes a self contained `dashboard.html` with two pages, one for
+`python dashboard.py` writes a self contained `index.html` with two pages, one for
 the risk factors and one for the leakage story. It replaces the original Power BI report
 and fixes three problems that report had.
 
@@ -197,7 +199,6 @@ numerically so colour is never the only way to read it.
   if a school changed any of these factors.
 - The `full` feature set is retained deliberately as a demonstration of leakage. It is not
   a result and should not be quoted as one.
-
 
 ## Attribution
 
