@@ -39,6 +39,12 @@ SEED = 42
 
 C_HIGH = "#C2410C"
 C_LOW = "#A8B0BA"
+# Page 2 only: leaky vs honest. Grey is too recessive for line charts, and the
+# honest models are the point of those charts, so they get real colour.
+C_FULL = "#C2410C"        # leaky, terracotta
+C_FULL_L = "#E08A63"      # leaky, second model
+C_EARLY = "#1D6A96"       # honest, deep blue
+C_EARLY_L = "#6FA8C7"     # honest, second model
 C_INK = "#1F2933"
 C_GREY = "#7B8794"
 C_LINE = "#E4E7EB"
@@ -76,7 +82,7 @@ def fail_rate(df, col, order=None):
 
 
 # ------------------------------------------------------- page 1 figures
-def rate_fig(df, col, base, order=None, height=330, title=None):
+def rate_fig(df, col, base, order=None, height=330):
     g = fail_rate(df, col, order)
     ticks = [f"{c}<br><span style='font-size:9.5px;color:#9AA5B1'>n={int(n)}</span>"
              for c, n in zip(g[col].astype(str), g["n"])]
@@ -99,11 +105,16 @@ def rate_fig(df, col, base, order=None, height=330, title=None):
     fig.update_xaxes(showgrid=False, tickfont=dict(size=11.5), fixedrange=True,
                      automargin=True)
     fig.update_layout(height=height, template="plotly_white", bargap=0.42, font=FONT,
-                      margin=dict(t=30 if title else 12, b=40, l=46, r=14),
-                      plot_bgcolor="white", paper_bgcolor="white", dragmode=False, showlegend=False, 
-                      title=dict(text=title, font=dict(size=13, color=C_GREY),
-                                 x=0, xanchor="left") if title else None)
+                      margin=dict(t=14, b=40, l=46, r=14),
+                      plot_bgcolor="white", paper_bgcolor="white",
+                      dragmode=False, showlegend=False)
     return fig
+
+
+def chart_block(label, fig):
+    """Caption rendered as HTML above the chart rather than as a plotly title,
+    so it cannot overlap the plot area or sit behind the toolbar."""
+    return f'<div class="cb"><div class="cb-label">{label}</div>{h(fig)}</div>' 
 
 
 def support_fig(df, base, height=340):
@@ -213,8 +224,8 @@ def run_models(df):
 def leakage_fig(res, height=400):
     order = ["Baseline", "Logistic Regression", "Random Forest", "SVM"]
     fig = go.Figure()
-    for fs, color, name in (("early", C_LOW, "early (no grades)"),
-                            ("full", C_HIGH, "full (grades included)")):
+    for fs, color, name in (("early", C_EARLY, "early (no grades)"),
+                            ("full", C_FULL, "full (grades included)")):
         sub = res[res.feature_set == fs].set_index("model").loc[order]
         fig.add_trace(go.Bar(
             x=order, y=sub["accuracy"], name=name, marker_color=color,
@@ -235,16 +246,18 @@ def leakage_fig(res, height=400):
 
 def pr_fig(curves, prevalence, height=400):
     fig = go.Figure()
-    styles = {("full", "SVM"): (C_HIGH, "solid", "full, SVM"),
-              ("full", "Logistic Regression"): (C_HIGH, "dot", "full, Logistic Regression"),
-              ("early", "Random Forest"): (C_LOW, "solid", "early, Random Forest"),
-              ("early", "Logistic Regression"): (C_LOW, "dot", "early, Logistic Regression")}
-    for key, (color, dash, label) in styles.items():
+    styles = {
+        ("early", "Random Forest"):       (C_EARLY,   "solid", 3.0, "early, Random Forest"),
+        ("early", "Logistic Regression"): (C_EARLY_L, "dash",  2.6, "early, Logistic Regression"),
+        ("full", "SVM"):                  (C_FULL,    "solid", 3.0, "full, SVM"),
+        ("full", "Logistic Regression"):  (C_FULL_L,  "dash",  2.6, "full, Logistic Regression"),
+    }
+    for key, (color, dash, wid, label) in styles.items():
         if key not in curves:
             continue
         r, p = curves[key]
         fig.add_trace(go.Scatter(x=r, y=p, mode="lines", name=label,
-                                 line=dict(color=color, width=2.4, dash=dash),
+                                 line=dict(color=color, width=wid, dash=dash),
                                  hovertemplate="recall %{x:.2f}<br>precision %{y:.2f}<extra></extra>"))
     fig.add_hline(y=prevalence, line_dash="dash", line_color=C_INK, opacity=.45,
                   line_width=1.5,
@@ -328,19 +341,23 @@ def build_html(df):
                   "the five to ten hour band. More hours beyond that point are not "
                   "associated with better outcomes. Longer commutes coincide with higher "
                   "risk, though those bands hold very few students.",
-                  '<div class="twoup">' + h(rate_fig(df, "study_band", base, list(STUDY.values()),
-                                                     title="Weekly study time"))
-                  + h(rate_fig(df, "travel_band", base, list(TRAVEL.values()),
-                               title="Travel time to school")) + "</div>")
+                  '<div class="twoup">'
+                  + chart_block("Weekly study time",
+                                rate_fig(df, "study_band", base, list(STUDY.values())))
+                  + chart_block("Travel time to school",
+                                rate_fig(df, "travel_band", base, list(TRAVEL.values())))
+                  + "</div>")
 
     p1 += section(3, "Family background shows a real gradient",
                   "Maternal education tracks fail rates clearly, from primary education down "
                   "to higher education. The paternal gradient runs the same way but is "
                   "weaker and noisier at the extremes.",
-                  '<div class="twoup">' + h(rate_fig(df, "m_edu_band", base, list(EDU.values()),
-                                                     title="Mother's education"))
-                  + h(rate_fig(df, "f_edu_band", base, list(EDU.values()),
-                               title="Father's education")) + "</div>")
+                  '<div class="twoup">'
+                  + chart_block("Mother's education",
+                                rate_fig(df, "m_edu_band", base, list(EDU.values())))
+                  + chart_block("Father's education",
+                                rate_fig(df, "f_edu_band", base, list(EDU.values())))
+                  + "</div>")
 
     p1 += section(4, "Support factors move the needle less than expected",
                   "Extra lessons, internet access and extra-curricular activities each shift "
@@ -472,13 +489,16 @@ h1 { font-size:31px; margin:0 0 10px; font-weight:600; letter-spacing:-.5px; }
 .secvis { min-width:0; }
 .twoup { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
 .timeline { padding:4px 0; }
-.tl-row { display:grid; grid-template-columns:170px 1fr; gap:16px; align-items:center;
-  padding:13px 0; border-bottom:1px dashed #E4E7EB; }
+.tl-row { display:grid; grid-template-columns:1fr; gap:8px;
+  padding:14px 0; border-bottom:1px dashed #E4E7EB; }
 .tl-row:last-of-type { border-bottom:0; }
-.tl-label { font-size:12px; color:#9AA5B1; text-transform:uppercase; letter-spacing:.7px;
+.tl-label { font-size:11px; color:#9AA5B1; text-transform:uppercase; letter-spacing:.8px;
   font-weight:600; }
-.tl-items span { display:inline-block; font-size:12.5px; padding:5px 11px; border-radius:20px;
-  margin:3px 6px 3px 0; }
+.tl-items { display:flex; flex-wrap:wrap; }
+.cb-label { font-size:12.5px; color:#7B8794; font-weight:600; margin:0 0 1px 8px; }
+.cb + .cb { margin-top:6px; }
+.tl-items span { display:inline-block; font-size:12.5px; padding:5px 12px; border-radius:20px;
+  margin:3px 7px 3px 0; white-space:nowrap; }
 .tl-items .ok { background:#F0F2F4; color:#52606D; }
 .tl-items .bad { background:#FBEAE3; color:#C2410C; }
 .tl-note { font-size:12.5px; color:#7B8794; margin-top:14px; line-height:1.6; }
@@ -535,7 +555,6 @@ h1 { font-size:31px; margin:0 0 10px; font-weight:600; letter-spacing:-.5px; }
                         border-radius:12px; padding:14px 15px; }
   .secvis:has(.timeline), .secvis:has(.compare) { background:none; border:0;
                                                   padding:0; }
-  .tl-row { grid-template-columns:1fr; gap:6px; padding:11px 0; }
   .tl-label { font-size:10.5px; }
   .tl-items span { font-size:12px; padding:4px 10px; }
   .cmp { padding:15px 16px; }
